@@ -1,0 +1,28 @@
+@baseUrl = https://localhost:7131
+@token = REEMPLAZA_CON_EL_ACCESS_TOKEN
+
+### Solicitar JWT valido por dos horas. Copia accessToken en la variable token.
+POST {{baseUrl}}/auth/token
+
+### Devuelve la lista de tasas de cambio almacenadas.
+GET {{baseUrl}}/rates
+Authorization: Bearer {{token}}
+
+### Crea nuevas tasas de cambio.
+POST {{baseUrl}}/rates
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "baseCurrency": "USD",
+  "targetCurrency": "EUR",
+  "rate": 0.92,
+  "date": "2024-01-02T00:00:00"
+}
+
+### Actualiza las tasas de cambio por moneda base (requiere pasar un body con los datos a actualizar).
+PUT {{baseUrl}}/rates/currency/USD
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "rate": 0.93 }

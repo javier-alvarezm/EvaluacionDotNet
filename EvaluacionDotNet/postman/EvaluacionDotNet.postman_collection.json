@@ -1,0 +1,567 @@
+{
+  "info": {
+    "name": "Evaluación .NET - Requerimientos del Proyecto",
+    "description": "Solicita un JWT de dos horas y prueba los endpoints del documento. No requiere registro, login ni credenciales. La base debe tener las migraciones aplicadas, que incluyen USD y EUR. El CRUD usa EUR como moneda base; DELETE /rates/currency/EUR elimina todas sus tasas almacenadas. Ejecuta la colección sobre una base de pruebas. Las consultas e importaciones Frankfurter usan USD/EUR.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7131",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "baseCurrency",
+      "value": "EUR",
+      "type": "string"
+    },
+    {
+      "key": "targetCurrency",
+      "value": "USD",
+      "type": "string"
+    },
+    {
+      "key": "startDate",
+      "value": "2020-01-02",
+      "type": "string"
+    },
+    {
+      "key": "endDate",
+      "value": "2020-01-03",
+      "type": "string"
+    },
+    {
+      "key": "id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "JWT",
+      "item": [
+        {
+          "name": "POST /auth/token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/auth/token",
+            "description": "POST /auth/token",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token', pm.response.json().accessToken);",
+                  "pm.test('JWT válido por dos horas', () => pm.expect(pm.response.json().expiresIn).to.eql(7200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Endpoints CRUD",
+      "item": [
+        {
+          "name": "POST /rates: Crea nuevas tasas de cambio.",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/rates",
+            "description": "Crea nuevas tasas de cambio.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseCurrency\": \"{{baseCurrency}}\",\n  \"targetCurrency\": \"{{targetCurrency}}\",\n  \"rate\": 2,\n  \"date\": \"{{startDate}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('id', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /rates: Crea nuevas tasas de cambio.",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/rates",
+            "description": "Crea nuevas tasas de cambio.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseCurrency\": \"{{baseCurrency}}\",\n  \"targetCurrency\": \"{{targetCurrency}}\",\n  \"rate\": 4,\n  \"date\": \"{{endDate}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /rates: Devuelve la lista de tasas de cambio almacenadas.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/rates",
+            "description": "Devuelve la lista de tasas de cambio almacenadas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /rates/{id}: Devuelve una tasa de cambio específica por Id.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/rates/{{id}}",
+            "description": "Devuelve una tasa de cambio específica por Id."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /rates/currency/{baseCurrency}: Devuelve las tasas de cambio por moneda base.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/rates/currency/{{baseCurrency}}",
+            "description": "Devuelve las tasas de cambio por moneda base."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Transformación de Datos",
+      "item": [
+        {
+          "name": "GET /rates/average?base={baseCurrency}&target={targetCurrency}&start={startDate}&end={endDate}: Devuelve el valor promedio de la tasa de cambio entre las fechas especificadas.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/rates/average?base={{baseCurrency}}&target={{targetCurrency}}&start={{startDate}}&end={{endDate}}",
+            "description": "Devuelve el valor promedio de la tasa de cambio entre las fechas especificadas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Promedio = 3', () => pm.expect(pm.response.json().average).to.eql(3));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /rates/minmax?base={baseCurrency}&target={targetCurrency}&start={startDate}&end={endDate}: Devuelve los valores mínimo y máximo de la tasa de cambio entre las fechas especificadas.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/rates/minmax?base={{baseCurrency}}&target={{targetCurrency}}&start={{startDate}}&end={{endDate}}",
+            "description": "Devuelve los valores mínimo y máximo de la tasa de cambio entre las fechas especificadas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Mínimo = 2, máximo = 4', () => { const d=pm.response.json(); pm.expect(d.min).to.eql(2); pm.expect(d.max).to.eql(4); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Endpoints CRUD - Actualizar y eliminar",
+      "item": [
+        {
+          "name": "PUT /rates/{id}: Actualiza una tasa de cambio existente por Id.",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/rates/{{id}}",
+            "description": "Actualiza una tasa de cambio existente por Id.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseCurrency\": \"{{baseCurrency}}\",\n  \"targetCurrency\": \"{{targetCurrency}}\",\n  \"rate\": 3,\n  \"date\": \"{{startDate}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /rates/currency/{baseCurrency}: Actualiza las tasas de cambio por moneda base (requiere pasar un body con los datos a actualizar).",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/rates/currency/{{baseCurrency}}",
+            "description": "Actualiza las tasas de cambio por moneda base (requiere pasar un body con los datos a actualizar).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rate\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /rates/{id}: Elimina una tasa de cambio por Id.",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/rates/{{id}}",
+            "description": "Elimina una tasa de cambio por Id."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /rates/currency/{baseCurrency}: Elimina las tasas de cambio por moneda base.",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/rates/currency/{{baseCurrency}}",
+            "description": "Elimina las tasas de cambio por moneda base."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Consulta a la API de Frankfurter",
+      "item": [
+        {
+          "name": "GET /frankfurter/latest",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/frankfurter/latest?base=USD&target=EUR",
+            "description": "GET /frankfurter/latest"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /frankfurter/historical",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/frankfurter/historical?base=USD&target=EUR&date=2024-01-02",
+            "description": "GET /frankfurter/historical"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /frankfurter/timeseries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/frankfurter/timeseries?base=USD&target=EUR&start=2024-01-02&end=2024-01-05",
+            "description": "GET /frankfurter/timeseries"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /frankfurter/convert",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/frankfurter/convert?from=USD&to=EUR&amount=100&date=2024-01-02",
+            "description": "GET /frankfurter/convert"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /frankfurter/import/latest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/frankfurter/import/latest",
+            "description": "POST /frankfurter/import/latest",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseCurrency\": \"USD\",\n  \"targetCurrency\": \"EUR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /frankfurter/import/historical",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/frankfurter/import/historical",
+            "description": "POST /frankfurter/import/historical",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseCurrency\": \"USD\",\n  \"targetCurrency\": \"EUR\",\n  \"date\": \"2024-01-02\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /frankfurter/import/timeseries",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/frankfurter/import/timeseries",
+            "description": "POST /frankfurter/import/timeseries",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseCurrency\": \"USD\",\n  \"targetCurrency\": \"EUR\",\n  \"start\": \"2024-01-02\",\n  \"end\": \"2024-01-05\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
