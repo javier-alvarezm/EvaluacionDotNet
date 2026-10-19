@@ -4,7 +4,7 @@ API RESTful en .NET 8 con Controllers, Entity Framework Core y SQL Server.
 
 ## Iniciar
 
-Desde la carpeta EvaluacionDotNet:
+Desde la raíz del repositorio:
 
 ```powershell
 dotnet run --project src/EvaluacionDotNet.Api --launch-profile https
